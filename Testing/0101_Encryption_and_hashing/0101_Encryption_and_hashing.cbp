@@ -2,7 +2,7 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="Encryption_and_hashing" />
+		<Option title="0101_Encryption_and_hashing" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
