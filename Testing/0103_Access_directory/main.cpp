@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 			}
     }
 
-		/* access directory, then output all items' name */{
+		/* open directory, then read all name of items under the directory */{
 			DIR *dir_stream;
 			struct dirent *dir_entry;
 
