@@ -17,6 +17,14 @@
 	/* 標準 C 函式庫 */
 		#include <stdio.h>
 
+#if defined(__unix) || defined(__unix__)
+	/* POSIX API(Unix only) */
+		#include <unistd.h>
+
+	/* limits.h for PATH_MAX */
+		#include <linux/limits.h>
+#endif
+
 /* 常數與巨集
  * Constants & Macros */
 
@@ -48,8 +56,16 @@
 			printCstring(component);
 		}
 
-		/* FIXME: 要換成跨平台的版本 */
 			putchar('\n');
 		return;
 	}
 
+#if defined(__unix) || defined(__unix__)
+	void printCurrentWorkingDirectory(void){
+		char buffer[PATH_MAX];
+
+		getcwd(buffer, sizeof(buffer));
+		fputs(buffer, stdout);
+		return;
+	}
+#endif

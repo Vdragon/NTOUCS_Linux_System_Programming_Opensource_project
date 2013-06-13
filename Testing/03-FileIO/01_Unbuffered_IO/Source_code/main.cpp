@@ -90,8 +90,8 @@
 
   /* 標準 C++ 函式庫 */
     /* Input/Output related */
-      /* Standard Input / Output Streams Library
-        #include <iostream> */
+      /* Standard Input / Output Streams Library*/
+        #include <iostream>
       /* Input/output file stream class
         #include <fstream> */
     /* Container */
@@ -104,6 +104,7 @@
         #include <algorithm> */
       /*
         #include <> */
+		using namespace std;
 
   /* Ｖ字龍的 C/C++ 函式庫蒐集
    * Vdragons C CPP Libraries Collection
@@ -112,6 +113,8 @@
     #include "showSoftwareInfo/showSoftwareInfo.h"
     #include "testSomething/C/testSomething.h"
     #include "Error/C/Error.h"
+		#include "printSomething/printSomething.h"
+
 
   /* Linux system calls */
     /* for open(2) */
@@ -133,16 +136,16 @@
      用途
      Usage 
        預先告訴編譯器(compiler)子程式的存在 */
-  void testOpenAndClose();
 
 /* 全域變數
  * Global Variables */
-  static int generic_return_value;
+  // static int generic_return_value;
 
 /* 函式的實作
  * Function implementations */
   /* main 函式 - C/C++ 程式的進入點(entry point) */
     int main(int argc, char *argv[]){
+      void testOpenAndClose();
 
     /*用來重新運行程式的label*/
     restart_program:
@@ -162,6 +165,10 @@
     std::string file_name;
     int file_descriptor;
 
+
+    cout << "目前的工作目錄為：";
+    printCurrentWorkingDirectory();
+    cout << endl;
     file_name = "Resources/Testing_open01.file";
     file_descriptor = open(file_name.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
       /* You MUST specify mode if O_CREATE, not specifying it will make a uninitialized garbage mode to the new file! */
