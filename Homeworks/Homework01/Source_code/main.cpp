@@ -58,7 +58,9 @@ main.c
 
 		std::string query_path;
 
+#ifdef PAUSE_WHEN_FINISH
   restart_program_from_here:
+#endif
 		show_software_info("作業01演示程式");
 
 		/* 處理命令列參數 */{
@@ -77,11 +79,13 @@ main.c
 		listEntryRecursive(query_path);
 
 	finish_program:
+#ifdef PAUSE_WHEN_FINISH
 		/*暫停程式運行（於main函式中）*/{
 			if(pauseProgram() == 1){
 					goto restart_program_from_here;
 			}
 		}
+#endif
 		return EXIT_SUCCESS;
   }
 
@@ -142,8 +146,3 @@ main.c
 
 		return;
 	}
-
-
-
-
-
