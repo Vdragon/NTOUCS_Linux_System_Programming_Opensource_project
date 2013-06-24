@@ -1,9 +1,9 @@
 /* include guard：避免同一個 header 檔案被 include 第二次 */
-	#ifndef PROGRAM_MAIN
+	#ifndef PROGRAM_NAME
 		/*程式名稱
 			Program name */
-			#define PROGRAM_MAIN "tw.edu.ntou.ind.Vdragon.linux.hw2"
-			#define PROGRAM_MAIN_NAME "作業二演示程式"
+			#define PROGRAM_NAME "org.vsdg.lib.vccl.Time"
+			#define PROGRAM_NAME_READABLE "時間相關函式庫"
 		/*更新紀錄
 			Changelog
 				Changelog is now stored on GitHub(http://www.github.com)
@@ -15,7 +15,7 @@
 				Todo is now stored on GitHub(http://www.github.com)
 			著作權宣告
 			Copyright declaration
-				Copyright RELEASE_YEAR © 未定義作者<undefined@mail.address>
+				Copyright 2013 © Vdragon<pika1021@gmail.com>
 			智慧財產授權條款
 			Intellectual property license
 				「程式名稱 | Program name」 is part of 「軟體名稱 | Software name」
@@ -40,17 +40,27 @@
 
 			/* Forward declarations */
 
-			/* 程式所 include 之函式庫的標頭檔
-			   Included Library Headers */
-
 			/* 常數與巨集的定義
 			 * Definition of constants & macros */
 
+			/* 程式所 include 之函式庫的標頭檔
+			   Included Library Headers */
+				/* 標準C函式庫 */
+					/* FILE * 的定義 */
+						#include <stdio.h>
+
 			/* 資料類型、enumeration、資料結構與物件類別的定義
 			 *  Definition of data type, enumeration, data structure and class */
+				/* 時間的格式 */
+					typedef enum time_format{
+						DEFAULT = 0
+					}Time_format;
 
 			/* 函式雛型
 				 Function prototypes */
+				/* 印出現在的時間 */
+					void printTime(Time_format format);
+					void fprintTime(FILE *output_stream, Time_format format);
 
 			/* 全域變數
 				 Global variables */
@@ -68,4 +78,4 @@
 			#ifdef __cplusplus
 				}
 			#endif /* __cplusplus */
-	#endif/* PROGRAM_MAIN */
+	#endif/* PROGRAM_NAME */

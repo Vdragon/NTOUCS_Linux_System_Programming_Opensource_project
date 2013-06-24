@@ -43,20 +43,20 @@
 			/* 常數與巨集的定義
 			 * Definition of constants & macros */
 				/*軟體名稱*/
-					#define SOFTWARE_NAME "未命名軟體"
+					#define SOFTWARE_NAME "NTOUCS_Linux_System_Programming_Opensource_project"
 				/*軟體開發者名稱*/
-					#define DEVELOPER_NAME "未命名開發者"
+					#define DEVELOPER_NAME "林博仁"
 				/*軟體開發者的電子郵件地址*/
-					#define DEVELOPER_EMAIL "（尚未設定電子郵件地址）"
+					#define DEVELOPER_EMAIL "pika1021@gmail.com"
 				/*用在著作權宣告的軟體釋出年份*/
 					#define SOFTWARE_RELEASE_YEAR "2013"
 				/* 用在軟體所使用的授權條款版本（目前尚未實作）
 				 * 有效值："「數字」（+）" "NONE"
 					#define SOFTWARE_LICENSE_VERSION "3+"*/
 				/* 軟體的官方網站 */
-					#define SOFTWARE_OFFICIAL_SITE "SOFTWARE_OFFICIAL_SITE undefined"
+					#define SOFTWARE_OFFICIAL_SITE "https://github.com/Vdragon/NTOUCS_Linux_System_Programming_Opensource_project"
 				/* 軟體的問題回報地址 */
-					#define SOFTWARE_ISSUE_REPORT_ADDRESS "SOFTWARE_ISSUE_REPORT_ADDRESS undefined"
+					#define SOFTWARE_ISSUE_REPORT_ADDRESS "https://github.com/Vdragon/NTOUCS_Linux_System_Programming_Opensource_project/issues"
 					
 			/* 程式所 include 之函式庫的標頭檔
 			   Included Library Headers */

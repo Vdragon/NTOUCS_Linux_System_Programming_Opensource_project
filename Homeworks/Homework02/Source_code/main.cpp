@@ -19,17 +19,18 @@
 	 *   C library - C++ Reference
 	 *   http://www.cplusplus.com/reference/clibrary/ */
 		/* C library to perform Input/Output operations
-			#include <stdio.h>
-			#include <cstdio> */
+			#include <stdio.h> */
+			#include <cstdio>
+
 		/* C Standard General Utilities Library
 			#include <stdlib.h> */
 			#include <cstdlib>
 		/* C error number
-			#include <errno.h>
-			#include <cerrno> */
+			#include <errno.h> */
+			#include <cerrno>
 		/* C Diagnostics Library
-			#include <assert.h>
-			#include <cassert> */
+			#include <assert.h> */
+			#include <cassert>
 		/* C Character handling functions
 			#include <ctype.h>
 			#include <cctype> */
@@ -67,11 +68,11 @@
 			#include <stdint.h>
 			#include <cstdint> */
 		/* C Strings
-			#include <string.h>
-			#include <cstring> */
+			#include <string.h> */
+			#include <cstring>
 		/* C Time Library
-			#include <time.h>
-			#include <ctime> */
+			#include <time.h> */
+			#include <ctime>
 		/* Unicode characters handling library(C++11 later)
 			#include <uchar.h>
 			#include <cuchar> */
@@ -90,8 +91,8 @@
 
 	/* 標準 C++ 函式庫 */
 		/* Input/Output related */
-			/* Standard Input / Output Streams Library
-				#include <iostream> */
+			/* Standard Input / Output Streams Library */
+				#include <iostream>
 			/* Input/output file stream class
 				#include <fstream> */
 		/* Container */
@@ -104,6 +105,7 @@
 				#include <algorithm> */
 			/*
 				#include <> */
+		using namespace std;
 
 	/* GNU gettext library */
 		#include <libintl.h>
@@ -113,17 +115,41 @@
        #include <sys/types.h>          /* See NOTES */
        #include <sys/socket.h>
 
+		/* for IPPROTO_* */
+			#include <netinet/in.h>
+
+		/* for inet_*()POSIX.1-2001 */
+			#include <arpa/inet.h>
+
+		/* for *host*() POSIX.1-2001 */
+			/* struct hostent *gethostbyname(const char *name); */
+				#include <netdb.h>
+				/* extern int h_errno; obseluted*/
+			/* gethostbyaddr() */
+				#include <sys/socket.h>
+
+			/* for getaddrinfo(3) */
+				#include <sys/types.h>
+				#include <sys/socket.h>
+				#include <netdb.h>
+
 	/* Ｖ字龍的 C/C++ 函式庫蒐集
 	 * Vdragons C CPP Libraries Collection
 	 *   https://github.com/Vdragon/Vdragons_C_CPP_Libraries_Collection */
 		#include "pauseProgram/pauseProgram.h"
 		#include "showSoftwareInfo/showSoftwareInfo.h"
 		#include "Project_specific_configurations/GNU_gettext_library.h"
+		#include "Error/C/Error.h"
+		#include "Time/C/Time.h"
 
 /* 常數與巨集的定義
  * Definition of constants & macros */
 	/* GNU gettext library */
 		#define _(Untranslated_C_string) gettext(Untranslated_C_string)
+	/* 預設值 */
+		#define DEFAULT_HOST "localhost"
+		#define DEFAULT_IP_ADDR "127.0.0.1"
+		#define DEFAULT_PORT 12345
 
 /* 資料類型、enumeration、資料結構與物件類別的定義
  * Definition of data type, enumeration, data structure and class */
@@ -141,21 +167,152 @@
  * Function implementations */
   /* main 函式 - C/C++ 程式的進入點(entry point) */
     int main(int argc, char *argv[]){
+    	void service(FILE *client_read, FILE *client_write);
+
     	/* 初始化 GNU gettext 函式庫 */
-				/* Use system default locale instead of "C" locale */
-					setlocale(LC_MESSAGES, "");
+				/* Use system default locale instead of "C" locale
+					setlocale(LC_MESSAGES, ""); */
 				bindtextdomain(MESSAGE_DOMAIN, LOCALEDIR);
 				textdomain(MESSAGE_DOMAIN);
 				bind_textdomain_codeset(MESSAGE_DOMAIN, MESSAGE_CHARSET);
-
+#define HEADING
+#ifdef PAUSE
     /*用來重新運行程式的label*/
     restart_program:
+#endif
+#ifdef HEADING
       showSoftwareInfo(_(PROGRAM_MAIN_NAME));
+#endif
 
+#ifdef UNIMPLEMENTED
+      /* 分析命令列參數 */{
+
+      }
+
+      /* 詢問連接的 socket 的位址 */{
+
+      }
+#endif
+      /* create a socket */{
+      	int socket_descriptor = -1;
+      	struct sockaddr_in socket_address;
+
+      	if((socket_descriptor = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1){
+      		printErrorErrno("socket", errno);
+      		exit(EXIT_FAILURE);
+      	}
+
+  			/* setup socket to allow same IP address rebinding */{
+  				int setting = 1;
+
+  				if(setsockopt(socket_descriptor, SOL_SOCKET, SO_REUSEADDR, &setting, sizeof(setting)) != 0){
+  					printErrorErrno("setsockopt", errno);
+  				}
+  			}
+
+      	/* clear all structure to 0(?) */
+      		memset(&socket_address, 0, sizeof(struct sockaddr_in));
+
+				socket_address.sin_family = AF_INET;
+				socket_address.sin_port = htons(DEFAULT_PORT);
+      	if(inet_aton(DEFAULT_IP_ADDR, &socket_address.sin_addr) == 0){
+      		printError("inet_aton", ERROR_SELF_DEFINED, _("IP 地址格式錯誤！"));
+      		exit(EXIT_FAILURE);
+      	}
+
+				/* bind a address to socket */{
+					if(bind(socket_descriptor, (struct sockaddr *)&socket_address, sizeof(struct sockaddr)) != 0){
+						printErrorErrno("bind", errno);
+						exit(EXIT_FAILURE);
+					}
+				}
+
+				/* create connection */{
+					if(listen(socket_descriptor, 5) != 0){
+						printErrorErrno("listen", errno);
+						exit(EXIT_FAILURE);
+					}
+				}
+
+				/* main server loop */{
+					sockaddr_in client_addr;
+					int socket_descriptor_client;
+					unsigned int i = sizeof(client_addr);
+					pid_t child_pid;
+
+					memset(&client_addr, 0, sizeof(client_addr));
+
+					while(true){
+						if((socket_descriptor_client = accept(socket_descriptor, (sockaddr *)&client_addr, &i)) < 0){
+							printErrorErrno("accept", errno);
+							exit(EXIT_FAILURE);
+						}else{
+
+							putchar('[');printTime(DEFAULT);putchar(']');
+							cout << _("已和一個客戶端建立連線！") << endl;
+						}
+
+						if((child_pid = fork()) < 0){
+							printErrorErrno("fork", errno);
+							exit(EXIT_FAILURE);
+						}else if(child_pid == 0){
+							FILE *socket_stream_client_r, *socket_stream_client_w;
+							int socket_descriptor_client_w = -1;
+
+							close(socket_descriptor);
+							if((socket_descriptor_client_w = dup(socket_descriptor_client)) < 0){
+								printErrorErrno("dup", errno);
+								exit(EXIT_FAILURE);
+							}
+							if((socket_stream_client_r = fdopen(socket_descriptor_client, "r")) == NULL){
+								printErrorErrno("fdopen", errno);
+								exit(EXIT_FAILURE);
+							}
+							if((socket_stream_client_w = fdopen(socket_descriptor_client_w, "w")) == NULL){
+								printErrorErrno("fdopen", errno);
+								exit(EXIT_FAILURE);
+							}
+							service(socket_stream_client_r, socket_stream_client_w);
+							if(fclose(socket_stream_client_r) == EOF){
+								printErrorErrno("fclose", errno);
+								exit(EXIT_FAILURE);
+							}
+							if(fclose(socket_stream_client_w) == EOF){
+								printErrorErrno("fclose", errno);
+								exit(EXIT_FAILURE);
+							}
+
+							exit(EXIT_SUCCESS);
+						}else{
+							close(socket_descriptor_client);
+						}
+					}
+				}
+
+				/* termination */{
+					if(shutdown(socket_descriptor, SHUT_RDWR) != 0){
+						printErrorErrno("shutdown", errno);
+					}
+
+					if(close(socket_descriptor) != 0){
+						printErrorErrno("close", errno);
+					}
+				}
+
+      }
+#ifdef PAUSE
       /* 暫停程式運行（於main函式中） */
         if(pauseProgram() == 1){
           goto restart_program;
         }
-
+#endif
       return EXIT_SUCCESS;
+    }
+
+    void service(FILE *client_read, FILE *client_write){
+    	fprintf(client_write, _(
+    		"歡迎使用聊天服務！\n"
+    		"打完要輸入的內容後按下 Enter 就會送出內容。\n"));
+
+    	return;
     }
