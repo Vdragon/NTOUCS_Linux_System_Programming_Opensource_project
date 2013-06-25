@@ -91,11 +91,19 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="../Source_code/Error/C/Error.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../Source_code/Error/C/Error.h" />
 		<Unit filename="../Source_code/Project_specific_configurations/Debug.h" />
 		<Unit filename="../Source_code/Project_specific_configurations/GNU_gettext_library.h" />
 		<Unit filename="../Source_code/Project_specific_configurations/Math.h" />
 		<Unit filename="../Source_code/Project_specific_configurations/Max_value.h" />
 		<Unit filename="../Source_code/Project_specific_configurations/Software_info.h" />
+		<Unit filename="../Source_code/Time/C/Time.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../Source_code/Time/C/Time.h" />
 		<Unit filename="../Source_code/main.cpp" />
 		<Unit filename="../Source_code/main.hpp" />
 		<Unit filename="../Source_code/pauseProgram/pauseProgram.c">

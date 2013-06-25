@@ -133,6 +133,20 @@
 				#include <sys/socket.h>
 				#include <netdb.h>
 
+		/* for getopt(3)
+			#include <unistd.h>
+			extern char *optarg;
+			extern int optind, opterr, optopt; */
+
+		/* for select(2) */
+			/* According to POSIX.1-2001 */
+			#include <sys/select.h>
+
+			/* According to earlier standards */
+			#include <sys/time.h>
+			#include <sys/types.h>
+			#include <unistd.h>
+
 	/* Ｖ字龍的 C/C++ 函式庫蒐集
 	 * Vdragons C CPP Libraries Collection
 	 *   https://github.com/Vdragon/Vdragons_C_CPP_Libraries_Collection */
@@ -141,6 +155,7 @@
 		#include "Project_specific_configurations/GNU_gettext_library.h"
 		#include "Error/C/Error.h"
 		#include "Time/C/Time.h"
+		#include "printSomething/printSomething.h"
 
 /* 常數與巨集的定義
  * Definition of constants & macros */
@@ -151,6 +166,7 @@
 		#define DEFAULT_IP_ADDR "127.0.0.1"
 		#define DEFAULT_PORT 12345
 
+	#define MAX_MESSAGE_LENGTH 100
 /* 資料類型、enumeration、資料結構與物件類別的定義
  * Definition of data type, enumeration, data structure and class */
 
@@ -159,15 +175,19 @@
      用途
      Usage 
        預先告訴編譯器(compiler)子程式的存在 */
-
+	void printTimestamp(FILE *output_stream, sockaddr_in address);
 /* 全域變數
  * Global Variables */
+	int generic_return_value = 0;
 
 /* 函式的實作
  * Function implementations */
   /* main 函式 - C/C++ 程式的進入點(entry point) */
     int main(int argc, char *argv[]){
     	void service(FILE *client_read, FILE *client_write);
+    	string host = DEFAULT_HOST;;
+    	string ip_addr = DEFAULT_IP_ADDR;;
+    	int port = -1;
 
     	/* 初始化 GNU gettext 函式庫 */
 				/* Use system default locale instead of "C" locale
@@ -175,6 +195,7 @@
 				bindtextdomain(MESSAGE_DOMAIN, LOCALEDIR);
 				textdomain(MESSAGE_DOMAIN);
 				bind_textdomain_codeset(MESSAGE_DOMAIN, MESSAGE_CHARSET);
+
 #define HEADING
 #ifdef PAUSE
     /*用來重新運行程式的label*/
@@ -184,15 +205,26 @@
       showSoftwareInfo(_(PROGRAM_MAIN_NAME));
 #endif
 
-#ifdef UNIMPLEMENTED
       /* 分析命令列參數 */{
-
+				if(/* 沒有參數 */argc == 1){
+		    	port = DEFAULT_PORT;
+				}else if(/* port */argc == 2){
+					port = atoi(argv[argc - 1]);
+				}else{
+					cerr << _("命令格式錯誤！") << endl;
+					cerr << _("命令格式：") << argv[0] << _(" 「使用的連接埠編號」") << endl;
+					exit(EXIT_FAILURE);
+				}
       }
 
-      /* 詢問連接的 socket 的位址 */{
-
+      /* 顯示伺服器配置 */{
+      	cout << _("當前伺服器的配置：") << endl
+      			 << _("\tIP 地址：") << ip_addr << endl
+      			 << _("\t通訊埠編號：") << port << endl
+      			 << _("\t請於終端機內執行 telnet ")
+      			 << ip_addr << ' ' << port << _(" 以連接到此伺服器。") << endl;
       }
-#endif
+
       /* create a socket */{
       	int socket_descriptor = -1;
       	struct sockaddr_in socket_address;
@@ -202,7 +234,7 @@
       		exit(EXIT_FAILURE);
       	}
 
-  			/* setup socket to allow same IP address rebinding */{
+  			/* setup socket to allow same port rebinding */{
   				int setting = 1;
 
   				if(setsockopt(socket_descriptor, SOL_SOCKET, SO_REUSEADDR, &setting, sizeof(setting)) != 0){
@@ -238,7 +270,13 @@
 					sockaddr_in client_addr;
 					int socket_descriptor_client;
 					unsigned int i = sizeof(client_addr);
-					pid_t child_pid;
+					FILE *socket_stream_client_r, *socket_stream_client_w;
+					int socket_descriptor_client_w = -1;
+//					pid_t child_pid;
+					fd_set readfds, backup;
+//					struct timeval timeout;
+					string message;
+					char message_C[MAX_MESSAGE_LENGTH];
 
 					memset(&client_addr, 0, sizeof(client_addr));
 
@@ -247,15 +285,82 @@
 							printErrorErrno("accept", errno);
 							exit(EXIT_FAILURE);
 						}else{
-
-							putchar('[');printTime(DEFAULT);putchar(']');
-							cout << _("已和一個客戶端建立連線！") << endl;
+							printTimestamp(stdout, (sockaddr_in) client_addr);
+							printf(_("已和客戶端 %s:%d 建立連線！\n"), inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 						}
 
+						FD_ZERO(&readfds);
+
+						FD_SET(STDIN_FILENO, &readfds);
+						FD_SET(socket_descriptor_client, &readfds);
+						backup = readfds;
+
+						if((socket_descriptor_client_w = dup(socket_descriptor_client)) < 0){
+							printErrorErrno("dup", errno);
+							exit(EXIT_FAILURE);
+						}
+
+						if(((socket_stream_client_r = fdopen(socket_descriptor_client, "r")) == NULL) ||
+							 ((socket_stream_client_w = fdopen(socket_descriptor_client_w, "w")) == NULL)){
+							printErrorErrno("fdopen", errno);
+							exit(EXIT_FAILURE);
+						}
+
+						setlinebuf(socket_stream_client_r);
+						setlinebuf(socket_stream_client_w);
+						fprintf(socket_stream_client_w, _(
+				    		"歡迎使用聊天服務！\n"
+				    		"打完要輸入的內容後按下 Enter 就會送出內容。\n"));
+						cout << _(
+				    		"歡迎使用聊天服務！\n"
+				    		"打完要輸入的內容後按下 Enter 就會送出內容。\n");
+
+						while(true){
+							readfds = backup;
+							generic_return_value = select(socket_descriptor_client + 1, &readfds, NULL, NULL, NULL);
+							if(generic_return_value < 0){
+								printErrorErrno("select", errno);
+								exit(EXIT_FAILURE);
+							}else if(generic_return_value){
+								fprintMessageDebug(stderr, _("select() 偵測到 nonblocking stream 了"));
+								if(FD_ISSET(STDIN_FILENO, &readfds)){
+									cin >> message;
+									if(message == "quit"){
+										exit(EXIT_SUCCESS);
+									}
+									printTimestamp(socket_stream_client_w, (sockaddr_in)socket_address);
+									fputs(_("伺服端："), socket_stream_client_w);
+									fputs(message.c_str(), socket_stream_client_w);
+									fputc('\n', socket_stream_client_w);
+									message.clear();
+								}
+
+								if(FD_ISSET(socket_descriptor_client, &readfds)){
+									if(fgets(message_C, MAX_MESSAGE_LENGTH, socket_stream_client_r) == NULL){
+										printErrorErrno("fgets", errno);
+										if(feof(socket_stream_client_r)){
+											cout << _("客戶端已斷線！") << endl;
+											shutdown(socket_descriptor_client, SHUT_RDWR);
+										}
+										exitError(ERROR_UNEXPECTED_CONDITION, EXIT_FAILURE);
+
+									}else{
+										if(strcmp(message_C, "quit\r\n") == 0){
+											cout << _("客戶端已斷線！") << endl;
+											shutdown(socket_descriptor_client, SHUT_RDWR);
+											break;
+										}
+									}
+									putchar('[');printTime(DEFAULT);putchar(']');
+									cout << _("客戶端：") << message_C;
+								}
+							}
+						}
+#ifdef DISABLED
 						if((child_pid = fork()) < 0){
 							printErrorErrno("fork", errno);
 							exit(EXIT_FAILURE);
-						}else if(child_pid == 0){
+						}else if(child_pid == 0){/* 子進程 */
 							FILE *socket_stream_client_r, *socket_stream_client_w;
 							int socket_descriptor_client_w = -1;
 
@@ -283,9 +388,10 @@
 							}
 
 							exit(EXIT_SUCCESS);
-						}else{
+						}else{/* 母進程 */
 							close(socket_descriptor_client);
 						}
+#endif
 					}
 				}
 
@@ -314,5 +420,15 @@
     		"歡迎使用聊天服務！\n"
     		"打完要輸入的內容後按下 Enter 就會送出內容。\n"));
 
+    	return;
+    }
+
+    void printTimestamp(FILE *output_stream, sockaddr_in address){
+    	fputc('[', output_stream);
+    	fprintTime(output_stream, DEFAULT);
+    	fprintf(output_stream, " @ %s:%d",
+    			inet_ntoa(address.sin_addr),
+    			ntohs(address.sin_port));
+    	fputc(']', output_stream);
     	return;
     }
