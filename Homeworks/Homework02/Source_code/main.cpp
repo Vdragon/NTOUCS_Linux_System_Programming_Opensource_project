@@ -196,6 +196,9 @@
 				textdomain(MESSAGE_DOMAIN);
 				bind_textdomain_codeset(MESSAGE_DOMAIN, MESSAGE_CHARSET);
 
+			/* 註冊結束時執行的程式 */
+				atexit(showSoftwareInfoBeforeExit);
+
 #define HEADING
 #ifdef PAUSE
     /*用來重新運行程式的label*/
@@ -246,7 +249,7 @@
       		memset(&socket_address, 0, sizeof(struct sockaddr_in));
 
 				socket_address.sin_family = AF_INET;
-				socket_address.sin_port = htons(DEFAULT_PORT);
+				socket_address.sin_port = htons(port);
       	if(inet_aton(DEFAULT_IP_ADDR, &socket_address.sin_addr) == 0){
       		printError("inet_aton", ERROR_SELF_DEFINED, _("IP 地址格式錯誤！"));
       		exit(EXIT_FAILURE);
@@ -260,7 +263,7 @@
 				}
 
 				/* create connection */{
-					if(listen(socket_descriptor, 5) != 0){
+					if(listen(socket_descriptor, 1) != 0){
 						printErrorErrno("listen", errno);
 						exit(EXIT_FAILURE);
 					}
@@ -356,7 +359,7 @@
 								}
 							}
 						}
-#ifdef DISABLED
+#ifdef DISABLED // 這是之前使用 fork() 的實作的部份程式碼
 						if((child_pid = fork()) < 0){
 							printErrorErrno("fork", errno);
 							exit(EXIT_FAILURE);
@@ -426,7 +429,7 @@
     void printTimestamp(FILE *output_stream, sockaddr_in address){
     	fputc('[', output_stream);
     	fprintTime(output_stream, DEFAULT);
-    	fprintf(output_stream, " @ %s:%d",
+    	fprintf(output_stream, " ＠ %s:%d",
     			inet_ntoa(address.sin_addr),
     			ntohs(address.sin_port));
     	fputc(']', output_stream);

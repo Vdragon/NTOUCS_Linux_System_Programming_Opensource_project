@@ -45,7 +45,7 @@
 				/*軟體名稱*/
 					#define SOFTWARE_NAME "NTOUCS_Linux_System_Programming_Opensource_project"
 				/*軟體開發者名稱*/
-					#define DEVELOPER_NAME "林博仁"
+					#define DEVELOPER_NAME "09957010 林博仁"
 				/*軟體開發者的電子郵件地址*/
 					#define DEVELOPER_EMAIL "pika1021@gmail.com"
 				/*用在著作權宣告的軟體釋出年份*/
