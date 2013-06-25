@@ -67,8 +67,8 @@
 			#include <stdint.h>
 			#include <cstdint> */
 		/* C Strings
-			#include <string.h>
-			#include <cstring> */
+			#include <string.h> */
+			#include <cstring>
 		/* C Time Library
 			#include <time.h>
 			#include <ctime> */
@@ -90,23 +90,30 @@
 
 	/* 標準 C++ 函式庫 */
 		/* Input/Output related */
-			/* Standard Input / Output Streams Library
-				#include <iostream> */
+			/* Standard Input / Output Streams Library */
+				#include <iostream>
 			/* Input/output file stream class
 				#include <fstream> */
 		/* Container */
 			/* list
 				#include <list> */
 		/* Unclassified */
-			/* Strings
-				#include <string> */
+			/* Strings */
+				#include <string>
 			/* Standard Template Library: Algorithms
 				#include <algorithm> */
 			/*
 				#include <> */
+		using namespace std;
 
 	/* GNU gettext library */
 		#include <libintl.h>
+
+	/* POSIX pthread */
+		#include <pthread.h>
+
+	/* for basename conversion */
+		#include <libgen.h>
 
 	/* Ｖ字龍的 C/C++ 函式庫蒐集
 	 * Vdragons C CPP Libraries Collection
@@ -114,6 +121,7 @@
 		#include "pauseProgram/pauseProgram.h"
 		#include "showSoftwareInfo/showSoftwareInfo.h"
 		#include "Project_specific_configurations/GNU_gettext_library.h"
+		#include "Error/C/Error.h"
 
 /* 常數與巨集的定義
  * Definition of constants & macros */
@@ -122,6 +130,11 @@
 
 /* 資料類型、enumeration、資料結構與物件類別的定義
  * Definition of data type, enumeration, data structure and class */
+	/* 軟體設定值 */
+		typedef struct configuration{
+			string bind_address; /*  = "127.0.0.1" */
+			unsigned bind_port;  /* 12345 */
+		}Configuration;
 
 /* 函式的宣告（函式雛型）
  * Function declarations (function prototypes)
@@ -136,6 +149,10 @@
  * Function implementations */
   /* main 函式 - C/C++ 程式的進入點(entry point) */
     int main(int argc, char *argv[]){
+    	void printUsage(char *argv[]);
+
+    	Configuration config = {"127.0.0.1", 12345};
+
     	/* 初始化 GNU gettext 函式庫 */
 				/* Use system default locale instead of "C" locale */
 					setlocale(LC_MESSAGES, "");
@@ -143,9 +160,54 @@
 				textdomain(MESSAGE_DOMAIN);
 				bind_textdomain_codeset(MESSAGE_DOMAIN, MESSAGE_CHARSET);
 
+			/* register exit callback */
+				atexit(showSoftwareInfoBeforeExit);
+
     /*用來重新運行程式的label*/
     restart_program:
       showSoftwareInfo(_(PROGRAM_MAIN_NAME));
+
+			/* 分析命令列參數 */{
+				if(/* 沒有參數 */argc == 1){
+					config.bind_port = 12345;
+				}else if(/* port */argc == 2){
+					char *last_valid_char;
+
+					config.bind_port = strtol(argv[1], (char **) &last_valid_char, 10);
+					if(/* 不是整個字串都是有效的數字 */!(
+							argv[1][0] != '\0' &&
+							*last_valid_char == '\0')){
+						cerr << _("偵測到錯誤的連接埠格式！") << endl;
+						printUsage(argv);
+						exit(EXIT_FAILURE);
+					}else if(
+							config.bind_port != 0 &&
+							config.bind_port <= 1024 &&
+							getuid() != 0){
+						cout << _("【警告】您指定的連接埠為通常只有 superuser 才能使用的連接埠範圍(1~1024)。") << endl
+								 << _("【警告】如果稍後 bind() 發生錯誤表示您沒有權限使用該連接埠。") << endl;
+					}else if(config.bind_port > 65535){
+						cerr << _("偵測到錯誤的連接埠格式！") << endl;
+						printUsage(argv);
+						exit(EXIT_FAILURE);
+					}
+				}else{
+					cerr << _("【錯誤】命令格式錯誤！") << endl;
+					printUsage(argv);
+					exit(EXIT_FAILURE);
+				}
+			}
+
+			/* 顯示伺服器配置 */{
+				cout << _("當前伺服器的配置：") << endl
+						 << _("\tIP 地址：") << config.bind_address << endl;
+				if(config.bind_port != 0){
+					cout << _("\t通訊埠編號：") << config.bind_port << endl
+					     << _("\t請於終端機內執行 telnet ")
+					     << config.bind_address << ' ' << config.bind_port
+					     << _(" 以連接到此伺服器。") << endl;
+				}
+			}
 
       /* 暫停程式運行（於main函式中） */
         if(pauseProgram() == 1){
@@ -153,4 +215,9 @@
         }
 
       return EXIT_SUCCESS;
+    }
+
+    void printUsage(char *argv[]){
+    	cout << _("命令格式：") << basename(argv[0]) << _(" 「使用的連接埠編號（0~65535，0 為自動選取可用連接埠）」") << endl;
+    	return;
     }

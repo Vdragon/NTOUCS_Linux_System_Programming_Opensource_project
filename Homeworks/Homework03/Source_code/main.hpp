@@ -2,8 +2,8 @@
 	#ifndef PROGRAM_MAIN
 		/*程式名稱
 			Program name */
-			#define PROGRAM_MAIN "undefined.program.domain"
-			#define PROGRAM_MAIN_NAME "Main program"
+			#define PROGRAM_MAIN "tw.idv.vdragon.ntoucs.linux.hw3"
+			#define PROGRAM_MAIN_NAME "作業三演示程式"
 		/*更新紀錄
 			Changelog
 				Changelog is now stored on GitHub(http://www.github.com)
