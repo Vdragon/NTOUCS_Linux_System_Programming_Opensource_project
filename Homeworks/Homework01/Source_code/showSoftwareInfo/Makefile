@@ -8,7 +8,7 @@
 NAME_PROJECT = NAME_PROJECT undefined
 NAME_PROJECT_ABBRIEVIATION = VCCL
 NAME_TARGET = NAME_TARGET undefined
-NAME_MODULE = File_system
+NAME_MODULE = showSoftwareInfo
 
 ## 目錄取名？
 ## Directory names?

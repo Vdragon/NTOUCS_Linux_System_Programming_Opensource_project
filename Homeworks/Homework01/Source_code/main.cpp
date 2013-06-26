@@ -31,9 +31,9 @@ main.c
 	/* Vdragons_C_CPP_Libraries_Collection */
 		/* for message tag definitions */
 			#include "Messages_templates/zh_TW.h"
-		#include "pauseProgram/Pause_program.h"
+		#include "pauseProgram/pauseProgram.h"
 			/* for pausing program execution */
-		#include "Show_software_info/Show_software_info.h"
+		#include "showSoftwareInfo/showSoftwareInfo.h"
 			/* for showing software info */
 		/* Error */
 			#include "Error/C/Error.h"
@@ -61,7 +61,7 @@ main.c
 #ifdef PAUSE_WHEN_FINISH
   restart_program_from_here:
 #endif
-		show_software_info("作業01演示程式");
+		showSoftwareInfo("作業01演示程式");
 
 		/* 處理命令列參數 */{
 			if(argc == 1){
