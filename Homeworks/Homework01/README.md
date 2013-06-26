@@ -1,4 +1,6 @@
 # 作業1<br />HW1
+## 實作狀態<br />Implementation status
+該有的功能應該都有了，不過如果要求列出不在當前工作目錄底下的項目會有警告訊息，目前實作不出印出該項目的相對於當前工作目錄的路徑。
 
 ## 檔案與目錄說明<br />File and directory description
 * /
