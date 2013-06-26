@@ -6,9 +6,9 @@
 ## 關於專案本身的變數
 ## Variables about the project itself
 NAME_PROJECT = NAME_PROJECT undefined
-NAME_PROJECT_ABBRIEVIATION = NAME_PROJECT_ABBRIEVIATION undefined
+NAME_PROJECT_ABBRIEVIATION = VCCL
 NAME_TARGET = NAME_TARGET undefined
-NAME_MODULE = NAME_MODULE undefined
+NAME_MODULE = File_system
 
 ## 目錄取名？
 ## Directory names?
@@ -48,7 +48,7 @@ COMPILER_GPP = g++
 OPTION_GPP_WITH_DEBUGGING_SYMBOLS = ${OPTION_GCC_WITH_DEBUGGING_SYMBOLS}
 OPTION_GPP_WARNING_COMMON = ${OPTION_GCC_WARNING_COMMON}
 OPTION_GPP_ONLY_COMPILE = ${OPTION_GCC_ONLY_COMPILE}
-OPTION_GPP_OUTPUT_FILENAME = ${OPTION_GCC_OUTPUT_FILENAME}
+OPTION_GPP_OUTPUT = ${OPTION_GCC_OUTPUT}
 
 COMMAND_GPP_ONLY_COMPILE = ${COMPILER_GPP} ${OPTION_GPP_ONLY_COMPILE} ${OPTION_GPP_WARNING_COMMON}
 
@@ -65,7 +65,6 @@ LINKER_GNU_LINKER = ld
 
 OPTION_GNU_LINKER_OUTPUT_FILENAME = -o
 OPTION_GNU_LINKER_LINK_GLIBC = -lc
-OPTION_GNU_LINKER_LINK_STDCPP = -llibstdc++
 
 ### 函式庫封裝器相關
 ### Library archiver related
@@ -137,7 +136,7 @@ else # Assumed Unix, TODO: We need more
 	COMMAND_CPP_COMPILER_ONLY_COMPILE = ${COMMAND_GPP_ONLY_COMPILE}
 	
 # 因為 ${POSTFIX_TYPE_EXECUTABLE} 到這裡才定義所以只能在這裡組合
-	COMMAND_LINK_EXECUTABLE = ${LINKER_GNU_LINKER} ${OPTION_GNU_LINKER_OUTPUT_FILENAME}
+	COMMAND_LINK_EXECUTABLE = ${LINKER_GNU} ${OPTION_GNU_LINKER_LINK_GLIBC} ${OPTION_GNU_LINKER_OUTPUT} ${NAME_PROJECT}.${POSTFIX_TYPE_EXECUTABLE}
 	
 	COMMAND_BUILD_STATIC_LIBRARY = ${ARCHIVER_LIBRARY_GNU_AR} ${OPTION_GNU_AR_OPCODE_INSERT_OBJECT}${OPTION_GNU_AR_MODIFIER_CREATE_FILE}${OPTION_GNU_AR_MODIFIER_ADD_INDEX_INFO} lib${NAME_PROJECT_ABBRIEVIATION}_${NAME_MODULE}.${POSTFIX_TYPE_STATIC_LIBRARY}
 	
@@ -154,7 +153,7 @@ endif
 # 主要內容
 # Main content
 .PHONY : all
-all : compile link
+all : compile build_library
 
 .PHONY : build_executable
 build_executable : compile link
@@ -163,14 +162,7 @@ build_executable : compile link
 build_library : compile archive_library
 
 .PHONY : compile
-compile : 
-	make --directory ${DIR_SOURCE_CODE}/Error/C
-	make --directory ${DIR_SOURCE_CODE}/File_system/CPP
-	make --directory ${DIR_SOURCE_CODE}/pauseProgram
-	make --directory ${DIR_SOURCE_CODE}/printSomething
-	make --directory ${DIR_SOURCE_CODE}/showSoftwareInfo
-	make --directory ${DIR_SOURCE_CODE}/Time/C/
-	${COMMAND_GPP_ONLY_COMPILE} ${OPTION_GPP_OUTPUT_FILENAME} ${DIR_SOURCE_CODE}/main.o ${DIR_SOURCE_CODE}/main.cpp
+compile : ${NAME_MODULE}.${POSTFIX_TYPE_OBJECT_CODE}
 
 .PHONY : archive_library
 archive_library : compile
@@ -178,7 +170,7 @@ archive_library : compile
 	
 .PHONY : link
 link : compile
-	g++ -o Demo.executable ${DIR_SOURCE_CODE}/main.o ${DIR_SOURCE_CODE}/Time/C/Time.o ${DIR_SOURCE_CODE}/Error/C/Error.o ${DIR_SOURCE_CODE}/File_system/CPP/File_system.o ${DIR_SOURCE_CODE}/pauseProgram/pauseProgram.o ${DIR_SOURCE_CODE}/printSomething/printSomething.o ${DIR_SOURCE_CODE}/showSoftwareInfo/showSoftwareInfo.o
+	${COMMAND_LINK_EXECUTABLE} *.${POSTFIX_TYPE_OBJECT_CODE}
 	
 .PHONY : clean
 clean :
