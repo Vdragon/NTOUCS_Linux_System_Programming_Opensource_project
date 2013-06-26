@@ -1,4 +1,6 @@
 # 作業2<br />HW2
+## 實作狀態<br />Implementation status
+應該完成的差不多了...
 
 ## 檔案與目錄說明<br />File and directory description
 * /
@@ -12,13 +14,9 @@
             * 軟體的建構產物  
               Software's built artifacts
     * IDE_*/
-        * 跟 * IDE 相關的檔案與建構產物
+        * 跟 * 整合式開發環境相關的檔案與該環境之專案建構產物
     * Translations/
         * 翻譯資料
-    * .project
-        * Eclipse 整合式開發環境專案檔案
-    * .cproject
-        * Eclipse CDT 專案檔案
     * README.md
         * 本說明文件  
           This documentation
