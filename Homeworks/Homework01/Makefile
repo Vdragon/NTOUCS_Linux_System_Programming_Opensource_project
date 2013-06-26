@@ -181,4 +181,9 @@ link : compile
 	
 .PHONY : clean
 clean :
+	make --directory ${DIR_SOURCE_CODE}/Error/C clean
+	make --directory ${DIR_SOURCE_CODE}/File_system/CPP clean
+	make --directory ${DIR_SOURCE_CODE}/pauseProgram clean
+	make --directory ${DIR_SOURCE_CODE}/printSomething clean
+	make --directory ${DIR_SOURCE_CODE}/showSoftwareInfo clean
 	${COMMAND_REMOVE_BUILT_ARTIFACTS} *.${POSTFIX_TYPE_OBJECT_CODE} *.${POSTFIX_TYPE_EXECUTABLE} *.${POSTFIX_TYPE_DYNAMIC_LIBRARY} *.${POSTFIX_TYPE_STATIC_LIBRARY}
